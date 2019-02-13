@@ -1,5 +1,5 @@
 # crosssocket
-![crosssocket logo](crosssocket.png?raw=true "crosssocket")  
+![crosssocket logo](crosssocket.png "crosssocket")  
 Cross platform socket library for C for reading and writing to sockets  
 Currently supports Linux, Unix and Windows
 

@@ -45,14 +45,11 @@ typedef SOCKET xs_SOCKET;
 inline int xs_init();
 inline int xs_clean();
 
-/*
- * Frees up memory
- */
-inline int xs_close(xs_SOCKET);
-
-inline int xs_socket(int, int, int);
+inline xs_SOCKET xs_socket(int af, int type, int protocol);
 inline int xs_send(xs_SOCKET sock, void *buffer, int buf_len, int flags);
 inline int xs_recv(xs_SOCKET sock, void *buffer, int buf_len, int flags);
+
+inline int xs_close(xs_SOCKET sock);
 
 #ifdef __cplusplus
 }
