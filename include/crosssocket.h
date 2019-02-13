@@ -43,6 +43,7 @@ typedef SOCKET xs_SOCKET;
  * Loads operating system specific libraries
  */
 inline int xs_init();
+inline int xs_clean();
 
 /*
  * Frees up memory

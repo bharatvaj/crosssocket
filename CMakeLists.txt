@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(crosssocket VERSION 0.3.0 DESCRIPTION "Cross-platfrom socket library for C")
+project(crosssocket VERSION 0.1.0 DESCRIPTION "Cross-platfrom socket library for C")
 find_package(clog)
 add_library(crosssocket src/crosssocket.c include/crosssocket.h)
 if (WIN32)
@@ -12,8 +12,7 @@ target_include_directories(crosssocket PUBLIC include)
 target_include_directories(crosssocket PUBLIC ${CLOG_INCLUDE_DIR})
 target_link_libraries(crosssocket ${CLOG_LIBS})
 
-#TODO
-#add_subdirectory(test)
+add_subdirectory(test)
 
 install(FILES include/crosssocket.h DESTINATION include)
 install(FILES crosssocket-config.cmake DESTINATION lib/cmake/crosssocket)
