@@ -8,6 +8,10 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR -1
+#endif
+
 #if defined(__linux__) || defined(__APPLE__)
 #if defined(__linux__) && defined(kernel_version_2_4)
 #include <sys/sendfile.h>
@@ -18,8 +22,7 @@ extern "C" {
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-typedef int SOCKET;
-#define SOCKET_ERROR -1
+typedef int xs_SOCKET;
 #elif _WIN32
 //#include <windows.h>
 //#include <ws2tcpip.h>
@@ -29,8 +32,8 @@ typedef int SOCKET;
 #define _CRT_SECURE_NO_WARNINGS
 	typedef short ssize_t;
 	typedef int socklen_t;
+	typedef SOCKET xs_SOCKET;
 #else
-	typedef int xs_SOCKET;
 #error OS not supported
 #endif
 
@@ -38,11 +41,10 @@ typedef int SOCKET;
 #define XS_CON_MAX_ATTEMPTS 5
 #define XS_SERV_BACKLOG 10
 
-typedef SOCKET xs_SOCKET;
 /*
  * Loads operating system specific libraries
  */
-int xs_init()
+static inline int xs_init()
 {
 #ifdef _WIN32
 		WORD wVersionRequested;
@@ -54,13 +56,11 @@ int xs_init()
 		err = WSAStartup(wVersionRequested, &wsaData);
 		if (err != 0)
 		{
-				log_fat(_XS, "WSAStartup failed with error: %d\n", err);
 				return 1;
 		}
 
 		if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
 		{
-				log_fat(_XS, "Could not find Winsock.dll with version 2.2, please install one");
 				xs_clean();
 				return -1;
 		}
@@ -68,7 +68,7 @@ int xs_init()
 		return 0;
 }
 
-int xs_clean()
+static inline int xs_clean()
 {
 #ifdef _WIN32
 		WSACleanup();
@@ -77,31 +77,31 @@ int xs_clean()
 }
 
 
-inline xs_SOCKET xs_socket(int af, int type, int protocol) {
+static inline xs_SOCKET xs_socket(int af, int type, int protocol) {
  return socket(af, type, protocol);
 }
 
-int xs_bind(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+static inline int xs_bind(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
 	return bind(socket, address, address_len);
 }
 
-int xs_connect(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+static inline int xs_connect(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
 	return connect(socket, address, address_len);
 }
 
-inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *address, socklen_t *address_len) {
+static inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *address, socklen_t *address_len) {
  return accept(socket, address, address_len);
 }
 
-inline int xs_send(xs_SOCKET sock, const void *buffer, int length, int flags) {
+static inline int xs_send(xs_SOCKET sock, const void *buffer, int length, int flags) {
  return send(sock, buffer, length, flags);
 
 }
-inline int xs_recv(xs_SOCKET sock, void *buffer, int length, int flags) {
+static inline int xs_recv(xs_SOCKET sock, void *buffer, int length, int flags) {
  return recv(sock, buffer, length, flags);
 }
 
-inline int xs_close(xs_SOCKET sock) {
+static inline int xs_close(xs_SOCKET sock) {
  #if defined(_WIN32)
 		 return closesocket(sock);
  #else
