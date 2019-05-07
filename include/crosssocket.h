@@ -81,15 +81,15 @@ inline xs_SOCKET xs_socket(int af, int type, int protocol) {
  return socket(af, type, protocol);
 }
 
-int bind(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+int xs_bind(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
 	return bind(socket, address, address_len);
 }
 
-int connect(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+int xs_connect(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
 	return connect(socket, address, address_len);
 }
 
-inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *restrict address, socklen_t *restrict address_len) {
+inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *address, socklen_t *address_len) {
  return accept(socket, address, address_len);
 }
 
