@@ -42,14 +42,72 @@ typedef SOCKET xs_SOCKET;
 /*
  * Loads operating system specific libraries
  */
-inline int xs_init();
-inline int xs_clean();
+int xs_init()
+{
+#ifdef _WIN32
+		WORD wVersionRequested;
+		WSADATA wsaData;
+		int err;
 
-inline xs_SOCKET xs_socket(int af, int type, int protocol);
-inline int xs_send(xs_SOCKET sock, void *buffer, int buf_len, int flags);
-inline int xs_recv(xs_SOCKET sock, void *buffer, int buf_len, int flags);
+		wVersionRequested = MAKEWORD(2, 2);
 
-inline int xs_close(xs_SOCKET sock);
+		err = WSAStartup(wVersionRequested, &wsaData);
+		if (err != 0)
+		{
+				log_fat(_XS, "WSAStartup failed with error: %d\n", err);
+				return 1;
+		}
+
+		if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
+		{
+				log_fat(_XS, "Could not find Winsock.dll with version 2.2, please install one");
+				xs_clean();
+				return -1;
+		}
+#endif
+		return 0;
+}
+
+int xs_clean()
+{
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return 0;
+}
+
+
+inline xs_SOCKET xs_socket(int af, int type, int protocol) {
+ return socket(af, type, protocol);
+}
+
+int bind(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+	return bind(socket, address, address_len);
+}
+
+int connect(xs_SOCKET socket, const struct sockaddr *address, socklen_t address_len) {
+	return connect(socket, address, address_len);
+}
+
+inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *restrict address, socklen_t *restrict address_len) {
+ return accept(socket, address, address_len);
+}
+
+inline int xs_send(xs_SOCKET sock, const void *buffer, int length, int flags) {
+ return send(sock, buffer, length, flags);
+
+}
+inline int xs_recv(xs_SOCKET sock, void *buffer, int length, int flags) {
+ return recv(sock, buffer, length, flags);
+}
+
+inline int xs_close(xs_SOCKET sock) {
+ #if defined(_WIN32)
+		 return closesocket(sock);
+ #else
+		 return close(sock);
+ #endif
+}
 
 #ifdef __cplusplus
 }

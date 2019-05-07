@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     printf("Unknown parameter\n");
     return -1;
   }
-  xs_close(sock);
+  // xs_close(sock);
   xs_clean();
   return status;
 }
