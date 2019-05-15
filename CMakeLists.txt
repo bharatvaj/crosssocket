@@ -1,17 +1,65 @@
-cmake_minimum_required(VERSION 3.8)
-project(crosssocket VERSION 0.3.0 LANGUAGES C DESCRIPTION "Cross-platfrom socket library for C")
-add_library(crosssocket INTERFACE)
+cmake_minimum_required(VERSION 3.5.1)
+project(crosssocket)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+
+# Set the build type if not set
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+add_library(crosssocket INTERFACE)
 target_include_directories(crosssocket INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
+#dependencies
 if (WIN32)
-    target_link_libraries(crosssocket wsock32 ws2_32)
+    target_link_libraries(crosssocket INTERFACE wsock32 ws2_32)
 endif ()
 
-add_subdirectory(test)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(WARNINGS "-Werror" "-Wall")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(WARNINGS "-Werror" "-Wall")
+elseif(MSVC)
+    set(WARNINGS "/WX" "/W4")
+endif()
+target_compile_options(crosssocket INTERFACE ${WARNINGS})
 
-#install(FILES crosssocket-config.cmake DESTINATION lib/cmake/crosssocket)
-install(FILES include/crosssocket.h DESTINATION include)
-enable_testing()
+if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+	include(GNUInstallDirs)
+
+	set(CROSSSOCKET_INC_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
+	set(CROSSSOCKET_RUNTIME_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
+	set(CROSSSOCKET_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+	set(CROSSSOCKET_ARCHIVE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+	set(CROSSSOCKET_FRAMEWORK_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+
+	set(CROSSSOCKET_CMAKE_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/crosssocket/cmake")
+	set(CROSSSOCKET_ADDITIONAL_FILES_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/crosssocket")
+
+	# Install target
+	install(TARGETS crosssocket EXPORT crosssocketTargets
+		RUNTIME       DESTINATION ${CROSSSOCKET_RUNTIME_INSTALL_DIR}
+		LIBRARY       DESTINATION ${CROSSSOCKET_LIBRARY_INSTALL_DIR}
+		ARCHIVE       DESTINATION ${CROSSSOCKET_ARCHIVE_INSTALL_DIR}
+		FRAMEWORK     DESTINATION ${CROSSSOCKET_FRAMEWORK_INSTALL_DIR})
+
+	# Install headers
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+		DESTINATION ${CROSSSOCKET_INC_INSTALL_DIR})
+
+	# Make cmake config files for all targets
+	install(EXPORT  crosssocketTargets
+		DESTINATION ${CROSSSOCKET_CMAKE_CONFIG_INSTALL_DIR}
+		FILE crosssocket-config.cmake)
+
+	# Install readme and license
+	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
+		DESTINATION ${CROSSSOCKET_ADDITIONAL_FILES_INSTALL_DIR})
+endif()
+
+if (CROSSSOCKET_TESTS)
+  add_subdirectory(test)
+endif()

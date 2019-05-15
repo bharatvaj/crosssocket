@@ -9,8 +9,6 @@
 
 #define _D_PORT 3500
 
-static const char *TAG = "TEST";
-
 xs_SOCKET sock;
 
 int test_server(int port){
