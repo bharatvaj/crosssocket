@@ -1,5 +1,5 @@
-#ifndef _XS
-#define _XS "XS"
+#ifndef _XS_H
+#define _XS_H "XS"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -7,10 +7,6 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef SOCKET_ERROR
-#define SOCKET_ERROR -1
-#endif
 
 #if defined(__linux__) || defined(__APPLE__)
 #if defined(__linux__) && defined(kernel_version_2_4)
@@ -24,22 +20,29 @@ extern "C" {
 #include <netdb.h>
 typedef int xs_SOCKET;
 #elif _WIN32
-//#include <windows.h>
-//#include <ws2tcpip.h>
 #include <winsock2.h>
-#include <Windows.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-	typedef short ssize_t;
-	typedef int socklen_t;
-	typedef SOCKET xs_SOCKET;
+typedef short ssize_t;
+typedef int socklen_t;
+#define xs_SOCKET SOCKET
+#define xs_ERROR INVALID_SOCKET
 #else
 #error OS not supported
 #endif
 
-#define XS_BUFFER_SIZE 256
-#define XS_CON_MAX_ATTEMPTS 5
-#define XS_SERV_BACKLOG 10
+#ifndef xs_ERROR
+#define xs_ERROR -1
+#endif
+
+/*
+ * Cleans up os specific libraries
+ */
+static inline int xs_clean()
+{
+#ifdef _WIN32
+		WSACleanup();
+#endif
+		return 0;
+}
 
 /*
  * Loads operating system specific libraries
@@ -68,15 +71,6 @@ static inline int xs_init()
 		return 0;
 }
 
-static inline int xs_clean()
-{
-#ifdef _WIN32
-		WSACleanup();
-#endif
-		return 0;
-}
-
-
 static inline xs_SOCKET xs_socket(int af, int type, int protocol) {
  return socket(af, type, protocol);
 }
@@ -93,11 +87,11 @@ static inline xs_SOCKET xs_accept(xs_SOCKET socket, struct sockaddr *address, so
  return accept(socket, address, address_len);
 }
 
-static inline int xs_send(xs_SOCKET sock, const void *buffer, int length, int flags) {
+static inline int xs_send(xs_SOCKET sock, const char *buffer, int length, int flags) {
  return send(sock, buffer, length, flags);
 
 }
-static inline int xs_recv(xs_SOCKET sock, void *buffer, int length, int flags) {
+static inline int xs_recv(xs_SOCKET sock, char *buffer, int length, int flags) {
  return recv(sock, buffer, length, flags);
 }
 

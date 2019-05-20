@@ -1,4 +1,6 @@
 build/
+.kdev4/
+*.kdev4
 .vscode/
 .vs/
 CMakeSettings.json
