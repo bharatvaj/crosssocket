@@ -53,6 +53,7 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 	# Make cmake config files for all targets
 	install(EXPORT  crosssocketTargets
 		DESTINATION ${CROSSSOCKET_CMAKE_CONFIG_INSTALL_DIR}
+		NAMESPACE crosssocket::
 		FILE crosssocket-config.cmake)
 
 	# Install readme and license
